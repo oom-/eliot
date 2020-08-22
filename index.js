@@ -3,7 +3,6 @@ const https = require('https');
 const http = require('http');
 const Say = require('say');
 const fs = require('fs');
-const iconv = require('iconv-lite')
 
 function getDayOfWeek() {
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -21,10 +20,10 @@ function getDateString() {
 function getHourString() {
     let str = new Date().toLocaleTimeString();
     let cut = str.split(':');
-    return `${cut[0]}:${cut[1]} ${str.indexOf('AM') ? 'am' : 'pm'} `;
+    return `${cut[0]} hour ${parseInt(cut[1])} minutes ${str.indexOf('AM') ? 'morning' : 'afternoon'}`;
 }
 
-async function HttpGet(url, forceNoEncoding = false) {
+async function HttpGet(url) {
     return new Promise((resolve, reject) => {
         let obj = url.toLowerCase().startsWith('https') ? https : http;
         obj.get(url, (resp) => {
@@ -35,10 +34,7 @@ async function HttpGet(url, forceNoEncoding = false) {
                 data += chunk;
             });
             resp.on('end', () => {
-                if (!forceNoEncoding)
-                    data = iconv.decode(data, "ISO-8859-1");
-                else
-                    data = new String(data);
+                data = new String(data);
                 resolve(data);
             });
         }).on("error", (err) => {
@@ -75,7 +71,7 @@ async function getRandomQuote() {
     return new Promise(async (resolve, reject) => {
         const url = "http://www.quotationspage.com/qotd.html";
         HttpGet(url)
-            .then(data => {  
+            .then(data => {
                 let indexFQ = data.indexOf('quote/');
                 indexFQ = data.indexOf('>', indexFQ) + 1;
                 let indexEQ = data.indexOf('</a>', indexFQ);
@@ -83,7 +79,7 @@ async function getRandomQuote() {
                 indexFA = data.indexOf('quotes/', indexFA);
                 indexFA = data.indexOf('>', indexFA) + 1;
                 let indexEA = data.indexOf('<', indexFA);
-                let quote = data.substring(indexFQ, indexEQ);
+                let quote = data.substring(indexFQ, indexEQ).trim().replace(/\.$/,'');
                 let author = data.substring(indexFA, indexEA);
                 resolve(`the quote of the day is from ${author.trim()}, saying ${quote.trim()}`);
             })
@@ -98,7 +94,8 @@ async function getRandomQuote() {
     //Say.getInstalledVoices((b,a) => console.log(a))
     let temp = await getTemperature();
     let quote = await getRandomQuote();
-    await Say.speak(`Welcome back sir, we are ${getDayOfWeek()} the ${getDateString()}, it's ${getHourString()} and ${temp}, ${quote}. I wish you a nice time sir, it was a real pleasure.`,
-        'Microsoft James'); //voice downloaded
+    let sentence = `Welcome back sir, we are ${getDayOfWeek()} the ${getDateString()}, it's ${getHourString()} and ${temp}, ${quote}. I wish you a nice time sir, it was a real pleasure.`;
+    console.log(sentence);
+    await Say.speak(sentence, 'Microsoft James'); //voice downloaded
 })();
 
