@@ -56,7 +56,7 @@ async function getTemperature() {
         const url = "https://www.google.com/search?q=meteo+";
 
         await HttpGet(url + town, true).then(data => {
-            fs.writeFileSync('test.html', data); //debug
+            //fs.writeFileSync('test.html', data); //debug
             //Find the special caracters
             let indexEnd = data.indexOf('° ' + unit);
             let indexStart = indexEnd;
