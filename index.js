@@ -20,7 +20,7 @@ function getDateString() {
 function getHourString() {
     let str = new Date().toLocaleTimeString();
     let cut = str.split(':');
-    return `${cut[0]} hour ${parseInt(cut[1])} minutes ${str.indexOf('AM') ? 'morning' : 'afternoon'}`;
+    return `${cut[0]} hour ${parseInt(cut[1])} minutes ${str.indexOf('AM') != -1 ? 'morning' : 'afternoon'}`;
 }
 
 async function HttpGet(url) {
